@@ -1,0 +1,53 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: stockdb
+    environment:
+      POSTGRES_USER: postgres
+      # NOTE: use a demo password here; change locally if you want something else
+      POSTGRES_PASSWORD: stockpass
+      POSTGRES_DB: stockdash
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4:8
+    container_name: pgadmin
+    environment:
+      # Demo pgAdmin login – safe to keep in source
+      PGADMIN_DEFAULT_EMAIL: admin@local.test
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api:
+    build:
+      context: ./backend
+    container_name: stock-api
+    environment:
+      NODE_ENV: development
+      # Uses the same demo password as POSTGRES_PASSWORD above
+      DATABASE_URL: postgres://postgres:stockpass@postgres:5432/stockdash
+      MARKET_API_KEY: replace-me
+    ports:
+      - "4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+
+
