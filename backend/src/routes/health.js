@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router } from "express"; 
 import { query } from "../services/db.js";
 
 const router = Router();
@@ -11,7 +11,7 @@ router.get("/", async (_req, res) => {
     res.status(500).json({ status: "error", message: err.message });
   }
 });
-
+  
 export default router;
 
 
